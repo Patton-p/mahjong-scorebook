@@ -1,0 +1,15 @@
+{
+  "description": "血战账本 · 微信小程序",
+  "appid": "touristappid",
+  "projectname": "mahjong-scorebook",
+  "miniprogramRoot": "miniprogram/",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "compileType": "miniprogram",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "minified": true,
+    "postcss": true
+  },
+  "libVersion": "latest"
+}

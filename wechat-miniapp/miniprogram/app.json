@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "血战账本",
+    "navigationBarBackgroundColor": "#123f35",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f4f5ef"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "__usePrivacyCheck__": true
+}

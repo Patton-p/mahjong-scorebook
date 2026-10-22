@@ -1,0 +1,11 @@
+const {test,beforeEach}=require('node:test');const assert=require('node:assert/strict');const S=require('../miniprogram/utils/score');
+let definition,stored,failWrite,page;
+global.Page=x=>{definition=x;};
+global.wx={getStorageSync:()=>stored,setStorageSync:(k,v)=>{if(failWrite)throw Error('disk full');stored=JSON.parse(JSON.stringify(v));},showModal:o=>o.success&&o.success({confirm:true}),showToast:()=>{}};
+require('../miniprogram/pages/index/index');
+beforeEach(()=>{stored=undefined;failWrite=false;page={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(p){Object.assign(this.data,p);}};page.onLoad();});
+test('save freezes weighted result; second photo accumulates; undo backs out one round',async()=>{page.setData({inputs:['38','9','-23','-24','0']});page.preview();await page.save();assert.equal(stored.rounds.length,1);assert.equal(page.data.roundNumber,2);page.setData({inputs:['-10','20','-40','15','15']});page.preview();await page.save();assert.deepEqual(S.totals(stored),[1460,2440,-3900,0,0]);await page.undo();assert.deepEqual(S.totals(stored),[1860,440,-2300,0,0]);assert.equal(page.data.roundNumber,2);});
+test('rapid double-save stores one round',async()=>{page.setData({inputs:['38','9','-23','-24','0']});page.preview();await Promise.all([page.save(),page.save()]);assert.equal(stored.rounds.length,1);});
+test('failed persistence never advances round or clears input',async()=>{failWrite=true;page.setData({inputs:['38','9','-23','-24','0']});page.preview();await page.save();assert.equal(page.state.rounds.length,0);assert.equal(page.data.roundNumber,1);assert.equal(page.data.inputs[0],'38');});
+test('OCR review fills four mapped rows and fifth zero without saving',()=>{page.setData({review:[{player:0,score:'38'},{player:1,score:'9'},{player:2,score:'-23'},{player:3,score:'-24'}]});page.applyReview();assert.deepEqual(page.data.inputs,['38','9','-23','-24','0']);assert.equal(page.state.rounds.length,0);assert.equal(page.data.canSave,true);});
+test('OCR repeated player and imbalance cannot populate form',()=>{page.setData({review:[{player:0,score:'38'},{player:0,score:'9'},{player:2,score:'-23'},{player:3,score:'-24'}]});page.applyReview();assert.deepEqual(page.data.inputs,['0','0','0','0','0']);});
